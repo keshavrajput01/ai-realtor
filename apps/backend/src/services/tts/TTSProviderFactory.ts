@@ -1,1 +1,83 @@
-import { TTSProvider } from './TTSProvider';\nimport { GoogleTTSProvider } from './providers/GoogleTTSProvider';\nimport { ElevenLabsTTSProvider } from './providers/ElevenLabsTTSProvider';\n\n/**\n * TTS Provider Factory\n * Creates and returns the appropriate TTS provider based on environment configuration\n */\nexport class TTSProviderFactory {\n  private static instance: TTSProvider | null = null;\n\n  /**\n   * Get the configured TTS provider instance (singleton)\n   */\n  static getInstance(): TTSProvider {\n    if (!this.instance) {\n      this.instance = this.createProvider();\n    }\n    return this.instance;\n  }\n\n  /**\n   * Create a new provider instance based on TTS_PROVIDER environment variable\n   */\n  private static createProvider(): TTSProvider {\n    const provider = process.env.TTS_PROVIDER || 'elevenlabs';\n\n    switch (provider.toLowerCase()) {\n      case 'elevenlabs':\n        console.log('✓ Using ElevenLabs TTS Provider');\n        return new ElevenLabsTTSProvider();\n\n      case 'google':\n        console.log('✓ Using Google Cloud TTS Provider');\n        return new GoogleTTSProvider();\n\n      case 'mock':\n        console.log('✓ Using Mock TTS Provider (testing)');\n        return new MockTTSProvider();\n\n      default:\n        throw new Error(\n          `Unknown TTS provider: ${provider}. Supported: elevenlabs, google, mock`\n        );\n    }\n  }\n\n  /**\n   * Reset the singleton instance (useful for testing)\n   */\n  static reset(): void {\n    this.instance = null;\n  }\n}\n\n/**\n * Mock TTS Provider for testing\n */\nclass MockTTSProvider implements TTSProvider {\n  async synthesize() {\n    return {\n      audioBuffer: Buffer.from('mock audio data'),\n      format: 'mp3',\n      duration: 2500,\n    };\n  }\n\n  async streamSynthesize(text, config, onChunk) {\n    return this.synthesize();\n  }\n\n  async healthCheck() {\n    return true;\n  }\n\n  async getSupportedLanguages() {\n    return ['en', 'hi', 'gu', 'mr', 'pa', 'ta', 'te', 'kn', 'ml'];\n  }\n\n  async getVoices(language: string) {\n    return ['voice-1', 'voice-2', 'voice-3'];\n  }\n}\n
+import { TTSProvider } from './TTSProvider';
+import { GoogleTTSProvider } from './providers/GoogleTTSProvider';
+import { ElevenLabsTTSProvider } from './providers/ElevenLabsTTSProvider';
+
+/**
+ * TTS Provider Factory
+ * Creates and returns the appropriate TTS provider based on environment configuration
+ */
+export class TTSProviderFactory {
+  private static instance: TTSProvider | null = null;
+
+  /**
+   * Get the configured TTS provider instance (singleton)
+   */
+  static getInstance(): TTSProvider {
+    if (!this.instance) {
+      this.instance = this.createProvider();
+    }
+    return this.instance;
+  }
+
+  /**
+   * Create a new provider instance based on TTS_PROVIDER environment variable
+   */
+  private static createProvider(): TTSProvider {
+    const provider = process.env.TTS_PROVIDER || 'elevenlabs';
+
+    switch (provider.toLowerCase()) {
+      case 'elevenlabs':
+        console.log('✓ Using ElevenLabs TTS Provider');
+        return new ElevenLabsTTSProvider();
+
+      case 'google':
+        console.log('✓ Using Google Cloud TTS Provider');
+        return new GoogleTTSProvider();
+
+      case 'mock':
+        console.log('✓ Using Mock TTS Provider (testing)');
+        return new MockTTSProvider();
+
+      default:
+        throw new Error(
+          `Unknown TTS provider: ${provider}. Supported: elevenlabs, google, mock`
+        );
+    }
+  }
+
+  /**
+   * Reset the singleton instance (useful for testing)
+   */
+  static reset(): void {
+    this.instance = null;
+  }
+}
+
+/**
+ * Mock TTS Provider for testing
+ */
+class MockTTSProvider implements TTSProvider {
+  async synthesize() {
+    return {
+      audioBuffer: Buffer.from('mock audio data'),
+      format: 'mp3',
+      duration: 2500,
+    };
+  }
+
+  async streamSynthesize(text, config, onChunk) {
+    return this.synthesize();
+  }
+
+  async healthCheck() {
+    return true;
+  }
+
+  async getSupportedLanguages() {
+    return ['en', 'hi', 'gu', 'mr', 'pa', 'ta', 'te', 'kn', 'ml'];
+  }
+
+  async getVoices(language: string) {
+    return ['voice-1', 'voice-2', 'voice-3'];
+  }
+}
